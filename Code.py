@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
+from texttable import Texttable
 from sklearn.model_selection import train_test_split
 from textblob import TextBlob
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -90,25 +91,30 @@ test_features = features_transform(X_test)
 
 
 # Function which takes in y test value and y predicted value and prints the associated model performance metrics
-def model_assessment(y_test , predicted_class):
-    print('confusion matrix')
-    print(confusion_matrix(y_test,predicted_class))
-    print('accuracy')
-    print(accuracy_score(y_test,predicted_class))
-    print('precision')
-    print(precision_score(y_test,predicted_class,pos_label='spam'))
-    print('recall')
-    print(recall_score(y_test,predicted_class,pos_label='spam'))
-    print('f-Score')
-    print(f1_score(y_test,predicted_class,pos_label='spam'))
-    print('AUC')
-    print(roc_auc_score(np.where(y_test=='spam',1,0),np.where(predicted_class == 'spam',1,0)))
+def model_assessment(y_test , predicted_class, model,color):
+    print(model.upper())
+
+    table = Texttable()
+    table.add_rows(
+        [
+            ["Confusion Matrix", confusion_matrix(y_test,predicted_class)],
+            ["",""],
+            ["Accuracy", accuracy_score(y_test,predicted_class)],
+            ["Precision", precision_score(y_test,predicted_class,pos_label='spam')],
+            ["Recall", recall_score(y_test,predicted_class,pos_label='spam')],
+            ["F-Score",f1_score(y_test,predicted_class,pos_label='spam')],
+            ["AUC", roc_auc_score(np.where(y_test=='spam',1,0),np.where(predicted_class == 'spam',1,0))]
+        ]
+    )
+    table.set_deco(Texttable.VLINES | Texttable.BORDER)
+    print(table.draw())
     print()
+
     cm = confusion_matrix(y_test, predicted_class)
-    sns.heatmap(cm, fmt='g', annot = True, cmap = "viridis" )
-    plt.title('confusion matrix')
-    plt.ylabel('expected label')
-    plt.xlabel('predicted label')
+    sns.heatmap(cm, fmt='g', annot = True, cmap = color)
+    plt.title('Confusion Matrix for %s' % model)
+    plt.ylabel('Expected label')
+    plt.xlabel('Predicted label')
     plt.show()
 
 # 1.Naive Bayes Model :
@@ -121,7 +127,7 @@ modelNB.fit(train_features, y_train)
 predicted_class_NB = modelNB.predict(test_features)
 
 # Assess NB
-model_assessment(y_test,predicted_class_NB)
+model_assessment(y_test,predicted_class_NB, "Naive Bayes Model","viridis")
 
 
 # 2.Decision Tree Model:
@@ -132,10 +138,10 @@ model_tree.fit(train_features,y_train)
 
 # Run model on test and print metrics
 predicted_class_tree = model_tree.predict(test_features)
-model_assessment(y_test,predicted_class_tree)
+model_assessment(y_test,predicted_class_tree, "Decision Tree Model","Greens_r")
 
 
-# 3.Support Vector Machine:
+# 3.Support Vector Machine (SVM) Model:
 
 # Create and fit SVM model
 model_svm = SVC()
@@ -143,10 +149,10 @@ model_svm.fit(train_features,y_train)
 
 # Run model on test and print metrics
 predicted_class_svm=model_svm.predict(test_features)
-model_assessment(y_test,predicted_class_svm)
+model_assessment(y_test,predicted_class_svm,"SVM Model","Reds_r")
 
 
-# 4. Random Forest
+# 4. Random Forest Model
 
 # Create and fit model
 model_rf = RandomForestClassifier(n_estimators=20, criterion='entropy')
@@ -154,4 +160,4 @@ model_rf.fit(train_features,y_train)
 
 # Run model on test and print metrics
 predicted_class_rf = model_rf.predict(test_features)
-model_assessment(y_test,predicted_class_rf)
+model_assessment(y_test,predicted_class_rf,"Random Forest Model","Blues_r")
