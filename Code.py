@@ -20,6 +20,11 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from tabulate import tabulate
+
+import warnings
+
+warnings.simplefilter(action='ignore', category = FutureWarning)
 
 # Loading the Dataset
 df = pd.read_csv("spam.csv")
@@ -72,7 +77,7 @@ def features_transform(mail):
     print('sparse matrix shape:', messages_bow.shape)
     print('number of non-zeros:', messages_bow.nnz)
     print('sparsity: %.2f%%' % (100.0 * messages_bow.nnz / (messages_bow.shape[0] * messages_bow.shape[1])))
-    print()
+    print('\n')
 
     # Apply the TF-IDF transform to the output of BOW
     tfidf_transformer = TfidfTransformer().fit(messages_bow)
@@ -92,72 +97,86 @@ test_features = features_transform(X_test)
 
 # Function which takes in y test value and y predicted value and prints the associated model performance metrics
 def model_assessment(y_test , predicted_class, model,color):
-    print(model.upper())
+
+    confusion_matrix_results = confusion_matrix(y_test, predicted_class)
+    accuracy_results = accuracy_score(y_test, predicted_class)
+    precision_results = precision_score(y_test, predicted_class, pos_label='spam')
+    recall_result = recall_score(y_test, predicted_class, pos_label='spam')
+    f_score_results = f1_score(y_test, predicted_class, pos_label='spam')
+    auc_results = roc_auc_score(np.where(y_test == 'spam', 1, 0), np.where(predicted_class == 'spam', 1, 0))
 
     table = Texttable()
     table.add_rows(
         [
-            ["Confusion Matrix", confusion_matrix(y_test,predicted_class)],
-            ["",""],
-            ["Accuracy", accuracy_score(y_test,predicted_class)],
-            ["Precision", precision_score(y_test,predicted_class,pos_label='spam')],
-            ["Recall", recall_score(y_test,predicted_class,pos_label='spam')],
-            ["F-Score",f1_score(y_test,predicted_class,pos_label='spam')],
-            ["AUC", roc_auc_score(np.where(y_test=='spam',1,0),np.where(predicted_class == 'spam',1,0))]
+            ["Confusion Matrix", confusion_matrix_results],
+            ["", ""],
+            ["Accuracy", accuracy_results],
+            ["Precision", precision_results],
+            ["Recall", recall_result],
+            ["F-Score", f_score_results],
+            ["AUC", auc_results]
         ]
     )
     table.set_deco(Texttable.VLINES | Texttable.BORDER)
+    print(model.upper())
     print(table.draw())
-    print()
+    print('\n')
 
     cm = confusion_matrix(y_test, predicted_class)
     sns.heatmap(cm, fmt='g', annot = True, cmap = color)
-    plt.title('Confusion Matrix for %s' % model)
+    plt.title(f'Confusion Matrix for {model}')
     plt.ylabel('Expected label')
     plt.xlabel('Predicted label')
     plt.show()
 
+    return confusion_matrix_results, accuracy_results, precision_results, recall_result, f_score_results, auc_results
+
+# Function for making Perfomance Metrics Table of All Models
+def final_data_table(nbm, dtm, svm, rfm):
+    headers = ["Model Name", "Naive Bayes Model", "Decision Tree Model", "SVM", "Random Forest Model"]
+    rows = ["Confusion Matrix", "Accuracy", "Precision", "Recall", "F-Score", "AUC"]
+
+    data = [[rows[i], nbm[i], dtm[i], svm[i], rfm[i]] for i in range(len(rows))]
+
+    print('Comparison Table for Models')
+    print(tabulate(data, headers=headers, tablefmt='pretty'))
+
+
 # 1.Naive Bayes Model :
 
-# create and fit NB model
-modelNB = MultinomialNB()
+modelNB = MultinomialNB() # Create and fit NB model
 modelNB.fit(train_features, y_train)
 
-# NB predictions
-predicted_class_NB = modelNB.predict(test_features)
-
-# Assess NB
-model_assessment(y_test,predicted_class_NB, "Naive Bayes Model","viridis")
+predicted_class_NB = modelNB.predict(test_features) # NB predictions
+nbm_model = model_assessment(y_test,predicted_class_NB, "Naive Bayes Model", "viridis") # Assess NB
 
 
 # 2.Decision Tree Model:
 
-# Create and fit tree model
-model_tree = DecisionTreeClassifier()
+model_tree = DecisionTreeClassifier() # Create and fit tree model
 model_tree.fit(train_features,y_train)
 
-# Run model on test and print metrics
-predicted_class_tree = model_tree.predict(test_features)
-model_assessment(y_test,predicted_class_tree, "Decision Tree Model","Greens_r")
+predicted_class_tree = model_tree.predict(test_features) # Run model on test and print metrics
+dtm_model = model_assessment(y_test,predicted_class_tree, "Decision Tree Model", "Greens_r")
 
 
 # 3.Support Vector Machine (SVM) Model:
 
-# Create and fit SVM model
-model_svm = SVC()
+model_svm = SVC() # Create and fit SVM model
 model_svm.fit(train_features,y_train)
 
-# Run model on test and print metrics
-predicted_class_svm=model_svm.predict(test_features)
-model_assessment(y_test,predicted_class_svm,"SVM Model","Reds_r")
+predicted_class_svm=model_svm.predict(test_features) # Run model on test and print metrics
+svm_model = model_assessment(y_test,predicted_class_svm, "SVM Model", "Reds_r")
 
 
 # 4. Random Forest Model
 
-# Create and fit model
-model_rf = RandomForestClassifier(n_estimators=20, criterion='entropy')
+model_rf = RandomForestClassifier(n_estimators=20, criterion='entropy') # Create and fit model
 model_rf.fit(train_features,y_train)
 
-# Run model on test and print metrics
-predicted_class_rf = model_rf.predict(test_features)
-model_assessment(y_test,predicted_class_rf,"Random Forest Model","Blues_r")
+predicted_class_rf = model_rf.predict(test_features) # Run model on test and print metrics
+rfm_model = model_assessment(y_test,predicted_class_rf, "Random Forest Model", "Blues_r")
+
+
+# Final Comparison Table for Models
+final_data_table(nbm_model, dtm_model, svm_model, rfm_model)
