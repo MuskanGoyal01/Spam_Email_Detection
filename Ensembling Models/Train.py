@@ -11,8 +11,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 
+import joblib
+import gzip
+
 # Loading Dataset
-df = pd.read_csv('spam.csv')
+df = pd.read_csv('../Statics/spam.csv')
 
 # Splitting the data into training and testing parts
 X_train, X_test, y_train, y_test = train_test_split(df['Message'], df['Category'], test_size=0.2, random_state=42)
@@ -38,3 +41,6 @@ pipe.fit(X_train, y_train)
 
 # Test Accuracy
 print(f"Accuracy: {round(pipe.score(X_test, y_test), 3) * 100} %")
+
+# Export model
+joblib.dump(pipe, gzip.open('../Statics/Spam Detector.dat.gz', "wb"))
