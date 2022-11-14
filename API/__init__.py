@@ -5,7 +5,7 @@ import joblib
 app = FastAPI()
 
 # Load model
-model = joblib.load('../Statics/Spam Detector.dat.gz')
+model = joblib.load('Statics/Spam Detector.dat.gz')
 
 
 def predict(X, model):
@@ -26,3 +26,4 @@ def get_model_response(input):
         'label': label,
         'spam': status
     }
+
