@@ -465,6 +465,7 @@ Output :
 | AUC               |   0.9463087248322148    |     0.935706643322634     |    0.936241610738255    |   0.8859060402684564    |
 
 <br>
+
 * Comparison Table for Models with feature 2 :
 
 | Model Name       |   Naive Bayes Model   |  Decision Tree Model   |          SVM          |  Random Forest Model  |
