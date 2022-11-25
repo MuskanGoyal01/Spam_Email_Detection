@@ -168,6 +168,8 @@ def split_into_lemmas(message):
 Most Frequent Word Count with Count	Vectorization.
 
 
+* Count Vectorizer is a method to convert text to numerical data.
+
 2. **The	feature	set	2 :**</br>
 Term Frequency - Inverse Document Frequency(Tf-idf) :
 * This uses all the tokens in the dataset as vocabulary.Frequency of occurrence of a token from vocabulary in each document consists of the term frequency and number of documents in which token occurs determines the Inverse document frequency.
