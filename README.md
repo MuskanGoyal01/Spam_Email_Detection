@@ -369,7 +369,7 @@ Output :
 
 ---
 3. **Support Vector Machine (SVM) Model**
-4. 
+
 ```commandline
 model_svm = SVC()  # Create and fit SVM model
 
