@@ -20,7 +20,7 @@ df = pd.read_csv('../Statics/spam.csv')
 # Splitting the data into training and testing parts
 X_train, X_test, y_train, y_test = train_test_split(df['Message'], df['Category'], test_size=0.2, random_state=42)
 
-# Create an ensemble of 3 models
+# Create an ensemble of 4 models
 estimators = []
 estimators.append(('Naive Bayes', MultinomialNB()))
 estimators.append(('CART', DecisionTreeClassifier()))
